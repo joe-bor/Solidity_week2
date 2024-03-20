@@ -6,19 +6,32 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
 async function deployContract() {
-  // TODO
+  const publicClient = await viem.getPublicClient();
+  const [deployer, otherAccount] = await viem.getWalletClients();
+  const ballotContract = await viem.deployContract("Ballot", [
+    PROPOSALS.map((prop) => toHex(prop, { size: 32 })),
+  ]);
+  return { publicClient, deployer, otherAccount, ballotContract };
 }
 
 describe("Ballot", async () => {
   describe("when the contract is deployed", async () => {
     it("has the provided proposals", async () => {
-      // TODO
-      throw Error("Not implemented");
+      const { ballotContract } = await loadFixture(deployContract);
+      //!  because dynamic arrays are not continuos in Solidity, we have to check per index basis
+      // const proposals0 = await ballotContract.read.proposals([0n]);
+      for (let index = 0; index < PROPOSALS.length; index++) {
+        const proposal = await ballotContract.read.proposals([BigInt(index)]);
+        expect(hexToString(proposal[0], { size: 32 })).to.eq(PROPOSALS[index]);
+      }
     });
 
     it("has zero votes for all proposals", async () => {
-      // TODO
-      throw Error("Not implemented");
+      const { ballotContract } = await loadFixture(deployContract);
+      for (let index = 0; index < PROPOSALS.length; index++) {
+        const proposal = await ballotContract.read.proposals([BigInt(index)]);
+        expect(proposal[1]).to.eq(0n);
+      }
     });
     it("sets the deployer address as chairperson", async () => {
       // TODO
