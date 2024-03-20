@@ -20,6 +20,7 @@ describe("Ballot", async () => {
       const { ballotContract } = await loadFixture(deployContract);
       //!  because dynamic arrays are not continuos in Solidity, we have to check per index basis
       // const proposals0 = await ballotContract.read.proposals([0n]);
+      // 0n == BigInt(0)
       for (let index = 0; index < PROPOSALS.length; index++) {
         const proposal = await ballotContract.read.proposals([BigInt(index)]);
         expect(hexToString(proposal[0], { size: 32 })).to.eq(PROPOSALS[index]);
@@ -33,10 +34,15 @@ describe("Ballot", async () => {
         expect(proposal[1]).to.eq(0n);
       }
     });
+
     it("sets the deployer address as chairperson", async () => {
-      // TODO
-      throw Error("Not implemented");
+      const { ballotContract, deployer } = await loadFixture(deployContract);
+      const chairperson = await ballotContract.read.chairperson();
+      //! Notice the type of chairperson => const chairperson: `0x${string}`
+      //! that's why we had to use toLowerCase() to convert it to traditional JS string in our assertion
+      expect(chairperson.toLowerCase()).to.eq(deployer.account.address);
     });
+
     it("sets the voting weight for the chairperson as 1", async () => {
       // TODO
       throw Error("Not implemented");
