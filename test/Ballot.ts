@@ -65,12 +65,31 @@ describe("Ballot", async () => {
 
   describe("when the chairperson interacts with the giveRightToVote function in the contract", async () => {
     it("gives right to vote for another address", async () => {
-      // TODO
-      throw Error("Not implemented");
+      const { ballotContract, otherAccount } = await loadFixture(
+        deployContract
+      );
+      const newAdd = otherAccount.account.address;
+      const _ = await ballotContract.write.giveRightToVote([newAdd]); //! idk what this returns
+      const newAddVoter = await ballotContract.read.voters([newAdd]);
+      expect(newAddVoter[0]).to.eq(1n);
     });
     it("can not give right to vote for someone that has voted", async () => {
-      // TODO
-      throw Error("Not implemented");
+      const { ballotContract } = await loadFixture(deployContract);
+      const chairperson = await ballotContract.read.chairperson();
+
+      // we need to create a tx where a voter votes
+      await ballotContract.write.vote([0n]);
+      const chairpersonVoter = await ballotContract.read.voters([chairperson]);
+      console.log(chairpersonVoter);
+      // then check if calling giveRightToVote on the voter's address throws an error
+      try {
+        const x = await ballotContract.write.giveRightToVote([chairperson]);
+        expect.fail("Tx should have failed");
+      } catch (error) {
+        expect(error.message).to.include("The voter already voted.");
+      }
+
+      // how do i capture that in a test: Error("The voter already voted.")
     });
     it("can not give right to vote for someone that has already voting rights", async () => {
       // TODO
