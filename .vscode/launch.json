@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Hardhat Tests",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["hardhat", "test"],
+      "args": ["--no-timeout"], // Add additional arguments as needed
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"], // Adjust if you have a different output directory
+      "preLaunchTask": "", // Optional: Specify a task name to run before debugging, like compilation
+      "internalConsoleOptions": "openOnSessionStart",
+      "sourceMaps": true,
+      "smartStep": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    }
+  ]
+}
