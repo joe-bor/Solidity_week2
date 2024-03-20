@@ -44,8 +44,22 @@ describe("Ballot", async () => {
     });
 
     it("sets the voting weight for the chairperson as 1", async () => {
-      // TODO
-      throw Error("Not implemented");
+      const { ballotContract } = await loadFixture(deployContract);
+      const chairperson = await ballotContract.read.chairperson();
+      /*
+      in Ballot.sol
+
+         mapping(address => Voter) public voters;
+
+         struct Voter {
+          uint weight; // weight is accumulated by delegation
+          bool voted; // if true, that person already voted
+          address delegate; // person delegated to
+          uint vote; // index of the voted proposal
+        }
+      */
+      const chairpersonVoter = await ballotContract.read.voters([chairperson]);
+      expect(chairpersonVoter[0]).to.eq(BigInt(1));
     });
   });
 
