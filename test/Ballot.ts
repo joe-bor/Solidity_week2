@@ -90,6 +90,7 @@ describe("Ballot", async () => {
       }
 
       // how do i capture that in a test: Error("The voter already voted.")
+      // https://viem.sh/docs/error-handling.html
     });
     it("can not give right to vote for someone that has already voting rights", async () => {
       // TODO How to fix red squiggly lin on error.message -> 'error' is of type 'unknown'
@@ -105,7 +106,6 @@ describe("Ballot", async () => {
   });
 
   describe("when the voter interacts with the vote function in the contract", async () => {
-    // TODO
     it("should register the vote", async () => {
       const { ballotContract } = await loadFixture(deployContract);
       const chairperson = await ballotContract.read.chairperson();
@@ -117,9 +117,24 @@ describe("Ballot", async () => {
   });
 
   describe("when the voter interacts with the delegate function in the contract", async () => {
-    // TODO
     it("should transfer voting power", async () => {
-      throw Error("Not implemented");
+      const { ballotContract, otherAccount } = await loadFixture(
+        deployContract
+      );
+      const chairperson = await ballotContract.read.chairperson(); // voter
+      const chairpersonVoter = await ballotContract.read.voters([chairperson]); // so i can track while debugging, might change
+
+      // 1) first we create a tx where we give another user the right to vote
+      const anotherPerson = otherAccount.account.address;
+      await ballotContract.write.giveRightToVote([anotherPerson]); //! this returns a promise that resolves to the receipt but we don't need it here
+      // anotherPerson should now have the right to vote
+
+      // 2) Now we can delegate chairperson's vote to anotherPerson
+      await ballotContract.write.delegate([anotherPerson]);
+      const anotherPersonVoter = await ballotContract.read.voters([
+        anotherPerson,
+      ]);
+      expect(anotherPersonVoter[0]).to.eq(2n);
     });
   });
 
