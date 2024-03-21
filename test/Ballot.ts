@@ -92,15 +92,27 @@ describe("Ballot", async () => {
       // how do i capture that in a test: Error("The voter already voted.")
     });
     it("can not give right to vote for someone that has already voting rights", async () => {
-      // TODO
-      throw Error("Not implemented");
+      // TODO How to fix red squiggly lin on error.message -> 'error' is of type 'unknown'
+      const { ballotContract } = await loadFixture(deployContract);
+      const chairperson = await ballotContract.read.chairperson();
+      try {
+        await ballotContract.write.giveRightToVote([chairperson]);
+        expect.fail("Tx should have failed");
+      } catch (error) {
+        expect(error.message).to.include("error");
+      }
     });
   });
 
   describe("when the voter interacts with the vote function in the contract", async () => {
     // TODO
     it("should register the vote", async () => {
-      throw Error("Not implemented");
+      const { ballotContract } = await loadFixture(deployContract);
+      const chairperson = await ballotContract.read.chairperson();
+
+      await ballotContract.write.vote([0n]);
+      const votedProposal = await ballotContract.read.proposals([0n]);
+      expect(votedProposal[1]).to.eq(1n);
     });
   });
 
