@@ -140,8 +140,17 @@ describe("Ballot", async () => {
 
   describe("when an account other than the chairperson interacts with the giveRightToVote function in the contract", async () => {
     // TODO
+    // find out how to externally call a contracts function
     it("should revert", async () => {
-      throw Error("Not implemented");
+      const { ballotContract, otherAccount, publicClient } = await loadFixture(
+        deployContract
+      );
+      const anotherPerson = await otherAccount.getAddresses();
+      const _ = await ballotContract.write.giveRightToVote([anotherPerson[0]], {
+        account: anotherPerson[0],
+      });
+      console.log(_);
+      otherAccount.wri;
     });
   });
 
