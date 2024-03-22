@@ -85,5 +85,3 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-
-//  TODO: find a viem equivalent of viem.getwalletClients so i can test the script
