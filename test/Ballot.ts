@@ -3,6 +3,7 @@ import { toHex, hexToString } from "viem";
 import { viem } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
+import { ProviderRpcError } from "hardhat/types";
 
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
@@ -145,24 +146,42 @@ describe("Ballot", async () => {
         deployContract
       );
       const anotherPersonList = await otherAccount.getAddresses();
-      const anotherPerson = anotherPersonList[0] as `0x${string}`;
+      const anotherPerson = anotherPersonList[1] as `0x${string}`;
       const anotherPersonWallet = await viem.getWalletClient(anotherPerson);
+      const chairperson = await ballotContract.read.chairperson();
 
-      expect(
-        anotherPersonWallet.writeContract({
+      try {
+        await anotherPersonWallet.writeContract({
           address: ballotContract.address,
           abi,
           functionName: "giveRightToVote",
           args: [anotherPerson],
-        })
-      ).to.be.rejectedWith("Only chairperson can give right to vote.");
+        });
+        expect.fail("Tx should have failed");
+      } catch (error) {
+        expect(error.message).to.include(
+          "Only chairperson can give right to vote."
+        );
+      }
     });
   });
 
   describe("when an account without right to vote interacts with the vote function in the contract", async () => {
-    // TODO
     it("should revert", async () => {
-      throw Error("Not implemented");
+      const { ballotContract, otherAccount } = await loadFixture(
+        deployContract
+      );
+      const randomPersonWallet = (await viem.getWalletClients())[1];
+      try {
+        await randomPersonWallet.writeContract({
+          address: ballotContract.address,
+          abi,
+          functionName: "vote",
+          args: [0],
+        });
+      } catch (error) {
+        expect(error.message).to.include("Has no right to vote");
+      }
     });
   });
 
