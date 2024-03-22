@@ -12,7 +12,7 @@ import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
 dotenv.config();
 
 const providerApiKey = process.env.ALCHEMY_API_KEY || "";
-const deployerPrivateKey = process.env.PRIVATE_KEY || "";
+const voterPrivateKey = process.env.PRIVATE_KEY || "";
 
 async function main() {
   // Cast your vote by providing the index of the proposal
@@ -52,7 +52,7 @@ async function main() {
     chain: sepolia,
     transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
   });
-  const account = privateKeyToAccount(`0x${deployerPrivateKey}`);
+  const account = privateKeyToAccount(`0x${voterPrivateKey}`);
   const voter = createWalletClient({
     account,
     chain: sepolia,
