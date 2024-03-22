@@ -24,10 +24,10 @@ async function main() {
   if (!/^0x[a-fA-F0-9]{40}$/.test(contractAddress))
     throw new Error("Invalid contract address");
 
-  //   const receivingAddress = parameters[1] as Address;
-  //   if (!receivingAddress) throw new Error("Receiving address not provided");
-  //   if (!/^0x[a-fA-F0-9]{40}$/.test(receivingAddress))
-  //     throw new Error("Invalid receiving address");
+  const receivingAddress = parameters[1] as Address;
+  if (!receivingAddress) throw new Error("Receiving address not provided");
+  if (!/^0x[a-fA-F0-9]{40}$/.test(receivingAddress))
+    throw new Error("Invalid receiving address");
 
   // create public client to connect to rpc
   const publicClient = createPublicClient({
@@ -44,18 +44,46 @@ async function main() {
   });
 
   // check if caller is the chairperson of the contract
-  const chairperson = await publicClient.readContract({
+  const chairperson = (await publicClient.readContract({
     address: contractAddress,
     abi,
     functionName: "chairperson",
-  });
+  })) as Address;
   if (caller.account.address != chairperson)
     throw new Error("Only chairman can give right to vote");
 
-  // wallet owner calls giveRightToVote(<arg: address>)
+  // --- User Interface / Terminal ---
+  console.log(
+    `\nWelcome chairperson! \n Are you sure you want to give ${receivingAddress} voting rights?`
+  );
+  console.log("Confirm (Y/n)");
+
+  const stdin = process.openStdin();
+  stdin.addListener("data", async function (input) {
+    // wallet owner calls giveRightToVote(<arg: address>)
+    if (input.toString().trim().toLowerCase() != "n") {
+      const hash = await caller.writeContract({
+        address: contractAddress,
+        abi,
+        functionName: "giveRightToVote",
+        args: [`0x${receivingAddress}`],
+      });
+
+      console.log(`Transaction hash: ${hash}`);
+      console.log("Waiting for confirmations...");
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      console.log("Transaction confirmed");
+      console.log(`${receivingAddress} has been given voting rights`);
+    } else {
+      console.log("Operation cancelled");
+    }
+    process.exit();
+  });
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+//  TODO: find a viem equivalent of viem.getwalletClients so i can test the script
