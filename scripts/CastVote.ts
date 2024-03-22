@@ -18,6 +18,21 @@ const deployerPrivateKey = process.env.PRIVATE_KEY || "";
 async function main() {
   // Cast you vote by providing the index of the proposal
   const parameters = process.argv.slice(2);
+
+  if (parameters.includes("--help") || parameters.includes("-h")) {
+    console.log(`Usage: node script.js <contractAddress> <proposalIndex>
+    \nThis script allows you to vote on a proposal in a Ballot contract.
+    \nArguments:
+    \n\tcontractAddress: The address of the Ballot contract.
+    \n\tproposalIndex: The index of the proposal you want to vote for.
+    \nEnvironment Variables:
+    \n\tALCHEMY_API_KEY: Your Alchemy API key.
+    \n\tPRIVATE_KEY: Your wallet's private key.
+    \nExample:
+    \n\tnode script.js 0x123...def 2`);
+    process.exit();
+  }
+
   if (!parameters || parameters.length < 2)
     throw new Error("Parameters not provided");
 
@@ -41,6 +56,7 @@ async function main() {
     chain: sepolia,
     transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
   });
+  // ---
 
   console.log("Proposal selected: ");
   const proposal = (await publicClient.readContract({
@@ -67,6 +83,7 @@ async function main() {
       console.log("Waiting for confirmations...");
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       console.log("Transaction confirmed");
+      console.log(`Address ${voter.account.address} voted for ${name}`);
     } else {
       console.log("Operation cancelled");
     }
