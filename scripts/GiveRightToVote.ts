@@ -66,7 +66,7 @@ async function main() {
         address: contractAddress,
         abi,
         functionName: "giveRightToVote",
-        args: [`0x${receivingAddress}`],
+        args: [receivingAddress],
       });
 
       console.log(`Transaction hash: ${hash}`);

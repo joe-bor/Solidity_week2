@@ -36,10 +36,10 @@ async function main() {
     args: [voterAddress],
   })) as any[];
 
-  const voterWeight = voter[0] as Number;
+  const voterWeight = Number(voter[0]);
   const voterVoted = voter[1] as Boolean;
   const voterDelegate = voter[2] as Address;
-  const voterVote = voter[3] as Number;
+  const voterVote = Number(voter[3]);
 
   console.log(
     `Address: ${voterAddress} \nWeight: ${voterWeight} \nAlready voted? ${voterVoted} \nDelegated to: ${voterDelegate} \nVoted for proposal: ${voterVote}`
