@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { toHex, hexToString } from "viem";
 import { viem } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
 
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
@@ -139,18 +140,22 @@ describe("Ballot", async () => {
   });
 
   describe("when an account other than the chairperson interacts with the giveRightToVote function in the contract", async () => {
-    // TODO
-    // find out how to externally call a contracts function
     it("should revert", async () => {
       const { ballotContract, otherAccount, publicClient } = await loadFixture(
         deployContract
       );
-      const anotherPerson = await otherAccount.getAddresses();
-      const _ = await ballotContract.write.giveRightToVote([anotherPerson[0]], {
-        account: anotherPerson[0],
-      });
-      console.log(_);
-      otherAccount.wri;
+      const anotherPersonList = await otherAccount.getAddresses();
+      const anotherPerson = anotherPersonList[0] as `0x${string}`;
+      const anotherPersonWallet = await viem.getWalletClient(anotherPerson);
+
+      expect(
+        anotherPersonWallet.writeContract({
+          address: ballotContract.address,
+          abi,
+          functionName: "giveRightToVote",
+          args: [anotherPerson],
+        })
+      ).to.be.rejectedWith("Only chairperson can give right to vote.");
     });
   });
 
