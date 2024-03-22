@@ -1,22 +1,23 @@
-import { abi, bytecode } from "../artifacts/contracts/Ballot.sol/Ballot.json";
 import {
   createPublicClient,
   http,
   createWalletClient,
-  formatEther,
-  toHex,
   hexToString,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import * as dotenv from "dotenv";
+import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
+
 dotenv.config();
 
 const providerApiKey = process.env.ALCHEMY_API_KEY || "";
 const deployerPrivateKey = process.env.PRIVATE_KEY || "";
 
 async function main() {
-  // Cast you vote by providing the index of the proposal
+  // Cast your vote by providing the index of the proposal
+  //process.argv[0] == Node runtime
+  //process.argv[1] == script path
   const parameters = process.argv.slice(2);
 
   if (parameters.includes("--help") || parameters.includes("-h")) {
@@ -44,6 +45,7 @@ async function main() {
 
   const proposalIndex = parameters[1];
   if (isNaN(Number(proposalIndex))) throw new Error("Invalid proposal index");
+  // TODO: Add validation that checks proposalIndex is not out of bounds. HOW??
 
   // --- connect to rpc
   const publicClient = createPublicClient({
