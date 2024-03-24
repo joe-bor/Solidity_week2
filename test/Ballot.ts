@@ -241,9 +241,20 @@ describe("Ballot", async () => {
   });
 
   describe("when someone interacts with the winnerName function after one vote is cast for the first proposal", async () => {
-    // TODO
     it("should return name of proposal 0", async () => {
-      throw Error("Not implemented");
+      const { ballotContract, deployer } = await loadFixture(deployContract);
+      await deployer.writeContract({
+        address: ballotContract.address,
+        abi,
+        functionName: "vote",
+        args: [0],
+      });
+      const NameOfProposalAtIndexZero = (
+        await ballotContract.read.proposals([0n])
+      )[0];
+      expect(await ballotContract.read.winnerName()).to.eq(
+        NameOfProposalAtIndexZero
+      );
     });
   });
 
