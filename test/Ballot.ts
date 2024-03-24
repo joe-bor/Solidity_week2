@@ -188,37 +188,55 @@ describe("Ballot", async () => {
   describe("when an account without right to vote interacts with the delegate function in the contract", async () => {
     // TODO
     it("should revert", async () => {
-      const {ballotContract} = await loadFixture(deployContract)
+      const { ballotContract, deployer } = await loadFixture(deployContract);
 
-      const randomPersonWallet = (await viem.getWalletClients())[1]
+      const randomPersonWallet = (await viem.getWalletClients())[1];
 
       try {
-        await randomPersonWallet.writeContract({address: })
+        await randomPersonWallet.writeContract({
+          address: ballotContract.address,
+          abi,
+          functionName: "delegate",
+          args: [deployer.account.address],
+        });
       } catch (error) {
-        
+        expect(error.message).to.include("You have no right to vote");
       }
-      throw Error("Not implemented");
     });
   });
 
   describe("when someone interacts with the winningProposal function before any votes are cast", async () => {
-    // TODO
     it("should return 0", async () => {
-      throw Error("Not implemented");
+      const { ballotContract } = await loadFixture(deployContract);
+
+      expect(await ballotContract.read.winningProposal()).to.eq(0n);
     });
   });
 
   describe("when someone interacts with the winningProposal function after one vote is cast for the first proposal", async () => {
-    // TODO
     it("should return 0", async () => {
-      throw Error("Not implemented");
+      const { ballotContract, deployer } = await loadFixture(deployContract);
+      await deployer.writeContract({
+        address: ballotContract.address,
+        abi,
+        functionName: "vote",
+        args: [0],
+      });
+      const voterStats = await ballotContract.read.voters([
+        deployer.account.address,
+      ]); // just double checking vote went through and not just returning default values
+
+      expect(await ballotContract.read.winningProposal()).to.eq(0n);
     });
   });
 
   describe("when someone interacts with the winnerName function before any votes are cast", async () => {
-    // TODO
     it("should return name of proposal 0", async () => {
-      throw Error("Not implemented");
+      const { ballotContract } = await loadFixture(deployContract);
+      const proposalAtIndexZero = (
+        await ballotContract.read.proposals([0n])
+      )[0];
+      expect(await ballotContract.read.winnerName()).to.eq(proposalAtIndexZero);
     });
   });
 
