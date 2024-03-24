@@ -3,7 +3,6 @@ import { toHex, hexToString } from "viem";
 import { viem } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
-import { ProviderRpcError } from "hardhat/types";
 
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
@@ -95,7 +94,6 @@ describe("Ballot", async () => {
       // https://viem.sh/docs/error-handling.html
     });
     it("can not give right to vote for someone that has already voting rights", async () => {
-      // TODO How to fix red squiggly lin on error.message -> 'error' is of type 'unknown'
       const { ballotContract } = await loadFixture(deployContract);
       const chairperson = await ballotContract.read.chairperson();
       try {
@@ -186,7 +184,6 @@ describe("Ballot", async () => {
   });
 
   describe("when an account without right to vote interacts with the delegate function in the contract", async () => {
-    // TODO
     it("should revert", async () => {
       const { ballotContract, deployer } = await loadFixture(deployContract);
 

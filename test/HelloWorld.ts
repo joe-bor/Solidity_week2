@@ -59,6 +59,6 @@ describe("HelloWorld", function () {
     blockNumber: 3n
   }
     */
-    expect(helloWorldText2).to.eq("I changed it to Potato");
+    expect(helloWorldText2).to.eq("I changed it to Potato!");
   });
 });
