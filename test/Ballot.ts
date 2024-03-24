@@ -259,9 +259,45 @@ describe("Ballot", async () => {
   });
 
   describe("when someone interacts with the winningProposal function and winnerName after 5 random votes are cast for the proposals", async () => {
-    // TODO
     it("should return the name of the winner proposal", async () => {
-      throw Error("Not implemented");
+      const { ballotContract, deployer } = await loadFixture(deployContract);
+      // I need 5 votes, so deployer + 4 more addresses
+      const randomPeopleList = (await viem.getWalletClients()).slice(1, 5);
+
+      // give voting rights to other people
+      randomPeopleList.forEach(async (person) => {
+        await deployer.writeContract({
+          address: ballotContract.address,
+          abi,
+          functionName: "giveRightToVote",
+          args: [person.account.address],
+        });
+
+        // Deployer votes
+        await deployer.writeContract({
+          address: ballotContract.address,
+          abi,
+          functionName: "vote",
+          args: [1],
+        });
+
+        // Other people vote
+        randomPeopleList.forEach(async (person) => {
+          await person.writeContract({
+            address: ballotContract.address,
+            abi,
+            functionName: "vote",
+            args: [2], // 'not really random'
+          });
+
+          const NameOfProposalAtIndexTwo = await ballotContract.read.proposals([
+            2n,
+          ]);
+          const winningProposalName = await ballotContract.read.winnerName();
+
+          expect(winningProposalName).to.eq(NameOfProposalAtIndexTwo);
+        });
+      });
     });
   });
 });
