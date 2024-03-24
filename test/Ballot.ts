@@ -188,6 +188,15 @@ describe("Ballot", async () => {
   describe("when an account without right to vote interacts with the delegate function in the contract", async () => {
     // TODO
     it("should revert", async () => {
+      const {ballotContract} = await loadFixture(deployContract)
+
+      const randomPersonWallet = (await viem.getWalletClients())[1]
+
+      try {
+        await randomPersonWallet.writeContract({address: })
+      } catch (error) {
+        
+      }
       throw Error("Not implemented");
     });
   });
