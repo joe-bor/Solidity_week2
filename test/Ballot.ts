@@ -83,12 +83,9 @@ describe("Ballot", async () => {
       const chairpersonVoter = await ballotContract.read.voters([chairperson]);
       console.log(chairpersonVoter);
       // then check if calling giveRightToVote on the voter's address throws an error
-      try {
-        const x = await ballotContract.write.giveRightToVote([chairperson]);
-        expect.fail("Tx should have failed");
-      } catch (error) {
-        expect(error.message).to.include("The voter already voted.");
-      }
+      expect(
+        ballotContract.write.giveRightToVote([chairperson])
+      ).to.be.rejectedWith("The voter already voted");
 
       // how do i capture that in a test: Error("The voter already voted.")
       // https://viem.sh/docs/error-handling.html
@@ -96,12 +93,9 @@ describe("Ballot", async () => {
     it("can not give right to vote for someone that has already voting rights", async () => {
       const { ballotContract } = await loadFixture(deployContract);
       const chairperson = await ballotContract.read.chairperson();
-      try {
-        await ballotContract.write.giveRightToVote([chairperson]);
-        expect.fail("Tx should have failed");
-      } catch (error) {
-        expect(error.message).to.include("error");
-      }
+
+      expect(ballotContract.write.giveRightToVote([chairperson])).to.be
+        .rejected;
     });
   });
 
@@ -148,19 +142,14 @@ describe("Ballot", async () => {
       const anotherPersonWallet = await viem.getWalletClient(anotherPerson);
       const chairperson = await ballotContract.read.chairperson();
 
-      try {
-        await anotherPersonWallet.writeContract({
+      expect(
+        anotherPersonWallet.writeContract({
           address: ballotContract.address,
           abi,
           functionName: "giveRightToVote",
           args: [anotherPerson],
-        });
-        expect.fail("Tx should have failed");
-      } catch (error) {
-        expect(error.message).to.include(
-          "Only chairperson can give right to vote."
-        );
-      }
+        })
+      ).to.be.rejectedWith("Only chairperson can give right to vote.");
     });
   });
 
@@ -170,16 +159,15 @@ describe("Ballot", async () => {
         deployContract
       );
       const randomPersonWallet = (await viem.getWalletClients())[1];
-      try {
-        await randomPersonWallet.writeContract({
+
+      expect(
+        randomPersonWallet.writeContract({
           address: ballotContract.address,
           abi,
           functionName: "vote",
           args: [0],
-        });
-      } catch (error) {
-        expect(error.message).to.include("Has no right to vote");
-      }
+        })
+      ).to.be.rejectedWith("Has no right to vote");
     });
   });
 
@@ -189,16 +177,14 @@ describe("Ballot", async () => {
 
       const randomPersonWallet = (await viem.getWalletClients())[1];
 
-      try {
-        await randomPersonWallet.writeContract({
+      expect(
+        randomPersonWallet.writeContract({
           address: ballotContract.address,
           abi,
           functionName: "delegate",
           args: [deployer.account.address],
-        });
-      } catch (error) {
-        expect(error.message).to.include("You have no right to vote");
-      }
+        })
+      ).to.be.rejectedWith("You have no right to vote");
     });
   });
 
